@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>موسوعة وأرشيف هجوم العمالقة الشامل | Attack on Titan Archive</title>
+  
+  <!-- Google Fonts: Cairo & Tajawal for Arabic typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            aotDark: '#0a0b0e',
+            aotCard: '#181b24',
+            aotGold: '#d4a34b',
+            aotCrimson: '#c53030'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Archive Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0a0b0e] text-gray-100">
+
+  <!-- Header & Navigation Bar -->
+  <header class="archive-header">
+    <div class="header-container">
+      <div class="brand-badge" onclick="switchTab('timeline')">
+        <div class="wings-icon">
+          <span>⚔</span>
+        </div>
+        <div class="brand-info">
+          <h1>موسوعة هجوم العمالقة الشاملة</h1>
+          <span>الأرشيف التاريخي وقاعدة البيانات التفاعلية (854 - 1000 ق.م)</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="timeline">
+          <span>⏳</span>
+          <span>التسلسل الزمني</span>
+          <span class="stats-pill" id="timelineCount">...</span>
+        </button>
+
+        <button class="tab-btn" data-tab="characters">
+          <span>👥</span>
+          <span>موسوعة الشخصيات</span>
+          <span class="stats-pill" id="charCount">...</span>
+        </button>
+
+        <button class="tab-btn" data-tab="titans">
+          <span>⚡</span>
+          <span>العمالقة التسعة والتكنولوجيا</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notice Banner for file:// CORS (appears only if browser blocks local fetch) -->
+  <div id="corsNoticeBanner" style="display: none; background: linear-gradient(90deg, #7f1d1d, #991b1b); color: #fff; padding: 0.85rem 1.5rem; text-align: center; font-size: 0.9rem; border-bottom: 2px solid #f87171;">
+    ⚠️ <strong>تنبيه المتصفح المحلي:</strong> تم فتح الموقع عبر بروتوكول <code>file://</code> وقام المتصفح بحظر قراءة ملفات JSON تلقائياً. 
+    لتشغيل الموقع بكامل بياناته، يرجى تشغيل خادم محلي خفيف مثل: <code>npx serve</code> أو <code>python -m http.server 8000</code> أو إضافة Live Server في VS Code.
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <span class="hero-tag">
+        <span>🛡️</span>
+        <span>الأرشيف الموحد لعالم إيسياما</span>
+      </span>
+      <h2 class="hero-title">المرجع التفاعلي الشامل لعالم هجوم العمالقة</h2>
+      <p class="hero-desc">
+        قاعدة بيانات تفاعلية تجمع المانجا الأساسية وجميع الأعمال الجانبية الرسمية (قبل السقوط - Before the Fall، لا ندم - No Regrets، الفتيات الضائعات - Lost Girls). تم تقسيم البيانات في ملفات JSON مستقلة في مجلد <code>/data</code> لتستوعب أكثر من 150 شخصية ومئات الأحداث التاريخية.
+      </p>
+
+      <div class="hero-metrics">
+        <div class="metric-item">
+          <span class="metric-number" id="metricEvents">9+</span>
+          <div>
+            <div style="font-weight: 700; color: #fff;">أحداث تاريخية</div>
+            <div class="metric-label">تسلسل زمني يمتد 2000 عام</div>
+          </div>
+        </div>
+
+        <div class="metric-item">
+          <span class="metric-number" id="metricChars">20+</span>
+          <div>
+            <div style="font-weight: 700; color: #fff;">شخصيات موثقة</div>
+            <div class="metric-label">رئيسية، ثانوية، وجانبية</div>
+          </div>
+        </div>
+
+        <div class="metric-item">
+          <span class="metric-number" id="metricTitans">9</span>
+          <div>
+            <div style="font-weight: 700; color: #fff;">العمالقة التسعة</div>
+            <div class="metric-label">أشجار التوارث والقدرات الكاملة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- ====================================================================
+         SECTION 1: MASTER TIMELINE (التسلسل الزمني الشامل)
+         ==================================================================== -->
+    <section id="timelineSection" class="tab-content-section active">
+      <div class="toolbar-card">
+        <div class="toolbar-grid">
+          <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="timelineSearch" 
+              class="main-search-input" 
+              placeholder="ابحث في الأحداث، السنوات، المعارك، أو أسماء المشاركين..."
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">تصفية حسب العمل:</label>
+            <select id="timelineWorkFilter" class="filter-select">
+              <option value="all">جميع الأعمال (الكل)</option>
+              <option value="المانجا الأساسية">المانجا الأساسية</option>
+              <option value="قبل السقوط (Before the Fall)">قبل السقوط (Before the Fall)</option>
+              <option value="لا ندم (No Regrets)">لا ندم (No Regrets)</option>
+              <option value="الفتيات الضائعات (Lost Girls)">الفتيات الضائعات (Lost Girls)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">الحقبة الزمنية:</label>
+            <select id="timelineEraFilter" class="filter-select">
+              <option value="all">جميع الحقب والعصور</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: flex-end;">
+            <button class="clear-filters-btn" style="padding: 0.65rem 1rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); width: 100%; text-align: center;">
+              إعادة ضبط الفلاتر
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Stream Flow -->
+      <div class="timeline-flow" id="timelineFlow">
+        <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+          <span>جاري تحميل التسلسل الزمني من <code>/data/timeline.json</code>...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: CHARACTER INDEX (موسوعة الشخصيات الشاملة)
+         ==================================================================== -->
+    <section id="charactersSection" class="tab-content-section">
+      <div class="toolbar-card">
+        <div class="toolbar-grid">
+          <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="charSearch" 
+              class="main-search-input" 
+              placeholder="ابحث بالاسم العربي أو الإنجليزي، اللقب، العملاق الموروث، أو السلاح..."
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">تصنيف الأهمية:</label>
+            <select id="charImportanceFilter" class="filter-select">
+              <option value="all">جميع المستويات</option>
+              <option value="رئيسية">شخصيات رئيسية</option>
+              <option value="ثانوية">شخصيات ثانوية</option>
+              <option value="جانبية">شخصيات جانبية</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">العمل الأصلي:</label>
+            <select id="charWorkFilter" class="filter-select">
+              <option value="all">جميع الأعمال</option>
+              <option value="المانجا الأساسية">المانجا الأساسية</option>
+              <option value="Before the Fall">قبل السقوط (Before the Fall)</option>
+              <option value="No Regrets">لا ندم (No Regrets)</option>
+              <option value="Lost Girls">الفتيات الضائعات (Lost Girls)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">الانتماء والجهة:</label>
+            <select id="charAffiliationFilter" class="filter-select">
+              <option value="all">جميع الانتماءات</option>
+              <option value="فيلق الاستطلاع">فيلق الاستطلاع</option>
+              <option value="الحامية">فيلق الحامية</option>
+              <option value="الشرطة العسكرية">الشرطة العسكرية</option>
+              <option value="محاربو مارلي">محاربو مارلي</option>
+              <option value="عائلة تايبر">عائلة تايبر / ريس</option>
+              <option value="المتطوعون المناهضون لمارلي">متطوعو مكافحة مارلي</option>
+              <option value="المدينة الصناعية">ورشة التطوير / المدينة الصناعية</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 font-bold mb-1">الحالة الحياتية:</label>
+            <select id="charStatusFilter" class="filter-select">
+              <option value="all">الكل (حي ومتوفى)</option>
+              <option value="alive">على قيد الحياة فقط</option>
+              <option value="dead">المتوفون فقط</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="active-filter-chips">
+          <span class="chip-label">نصيحة:</span>
+          <span class="filter-chip">اضغط على أي بطاقة شخصية لفتح الملف الشخصي الكامل (Character Dossier).</span>
+          <button class="clear-filters-btn">إعادة تعيين الفلاتر</button>
+        </div>
+      </div>
+
+      <!-- Character Cards Grid -->
+      <div class="character-grid" id="characterGrid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+          <span>جاري تحميل موسوعة الشخصيات من مجلد <code>/data</code>...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: THE NINE TITANS & LORE (العمالقة التسعة والتكنولوجيا)
+         ==================================================================== -->
+    <section id="titansSection" class="tab-content-section">
+      <div class="titans-layout">
+        <div>
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.6rem; color: #fff; margin-bottom: 0.3rem;">👑 شجرة توارث العمالقة التسعة (The Nine Titans)</h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+              التوثيق الزمني الكامل لورثة العمالقة التسعة منذ عهد يمير فريتز وبناتها الثلاث (ماريا، روز، سينا) حتى خاتمة أحداث دك الأرض وزوال لعنة الـ13 عاماً.
+            </p>
+          </div>
+
+          <div class="titans-grid" id="titansGrid">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- Military Technology & History -->
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 2rem;">
+          <h3 style="font-size: 1.5rem; color: #fff; margin-bottom: 0.3rem;">🛠 تاريخ التكنولوجيا والعتاد العسكري (Military Lore)</h3>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">
+            تطور تقنيات مواجهة العمالقة من أول نموذج لجهاز المناورة في رواية Before the Fall وحتى رماح الرعد والمدافع المضادة للعمالقة.
+          </p>
+
+          <div class="tech-grid" id="techGrid">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       CHARACTER DOSSIER MODAL (نافذة الملف الشخصي الكامل)
+       ==================================================================== -->
+  <div id="dossierModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="إغلاق">✕</button>
+      <div id="modalDetailsContainer">
+        <!-- Injected dynamically by openCharacterDossier() in app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="archive-footer">
+    <div style="max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.6rem; align-items: center;">
+      <div style="font-weight: 700; color: var(--accent-gold);">
+        موسوعة وأرشيف هجوم العمالقة الشامل © Hajime Isayama / Kodansha
+      </div>
+      <div>
+        تم بناء النظام بمجلد بيانات مستقل <code>/data</code> لسهولة التوسعة والإدارة اللامحدودة.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Engine Script -->
+  <script src="app.js"></script>
+</body>
+</html>
